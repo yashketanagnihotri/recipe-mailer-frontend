@@ -1,0 +1,30 @@
+# Node modules
+/node_modules
+
+# Build output
+/dist
+
+# Vite cache
+/.vite
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# VSCode settings
+.vscode/
+
+# MacOS specific
+.DS_Store
+
+# Windows specific
+Thumbs.db
+
+# Optional: Uncomment to ignore your local config files if needed
+# .idea/
