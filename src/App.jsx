@@ -10,13 +10,13 @@ export default function EmailRecipeSender() {
     setStatus(null);
     try {
       const response = await fetch(
-        "https://recipe-mailer-backend-production.up.railway.app/send-email",
+        "https://recipe-mailer-backend-production.up.railway.app/send-single-email",
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ receivers: [email] }),
+          body: JSON.stringify({ email: email }),
         }
       );
 
