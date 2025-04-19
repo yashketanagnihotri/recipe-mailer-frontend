@@ -60,7 +60,7 @@ const IngredientSelector = () => {
 
     try {
       const response = await axios.post(
-        "http://switchyard.proxy.rlwy.net:33720/generate-recipes", // Use proxy URL here
+        "http://recipe-mailer-backend.railway.internal/generate-recipes", // Use proxy URL here
         { ingredients: selectedIngredients },
         {
           headers: {
