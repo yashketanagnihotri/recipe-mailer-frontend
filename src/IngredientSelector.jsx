@@ -154,21 +154,22 @@ const IngredientSelector = () => {
                         onChange={(e) => handleSearchChange(category, e.target.value)}
                         className="w-full px-3 py-2 mb-2 border rounded"
                       />
-                      <div className="grid grid-cols-6 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                         {filteredIngredients.map((ingredient) => (
                           <button
                             key={ingredient}
                             onClick={() => toggleIngredient(ingredient)}
-                            className={`w-full px-3 py-2 rounded-lg border ${
+                            className={`w-full px-3 py-2 rounded-lg border transition-all duration-300 ease-in-out shadow ${
                               selectedIngredients.includes(ingredient)
-                                ? "bg-green-500 text-white"
-                                : "bg-white text-black"
+                                ? "bg-green-500 text-white border-green-600"
+                                : "bg-white text-black hover:bg-gray-100"
                             }`}
                           >
                             {ingredient}
                           </button>
                         ))}
                       </div>
+
                       <div className="mt-2 flex justify-center">
                         <button
                           onClick={() => handleAddCustomIngredient(category, searchTerms[category])}
