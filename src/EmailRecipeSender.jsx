@@ -10,7 +10,7 @@ export default function EmailRecipeSender() {
     setStatus(null);
     try {
       const response = await fetch(
-        "https://recipe-mailer-backend:8080/send-single-email",
+        "http://recipe-mailer-backend:8080/send-single-email",
         {
           method: "POST",
           headers: {
