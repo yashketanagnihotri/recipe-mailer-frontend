@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"; // Optional icons
 import Loader from "./Loader";
 
 const ingredientCategories = {
@@ -24,6 +25,8 @@ const IngredientSelector = () => {
   const [openCategory, setOpenCategory] = useState(null);
   const [searchTerms, setSearchTerms] = useState({});
   const [categoryIngredients, setCategoryIngredients] = useState(ingredientCategories);
+  const [showRecipes, setShowRecipes] = useState(false);
+  const [recipeIndex, setRecipeIndex] = useState(0);
 
   const playPop = () => {
     const audio = new Audio("/pop.mp3");
@@ -44,6 +47,7 @@ const IngredientSelector = () => {
     setLoading(true);
     setErrorMsg("");
     setRecipes([]);
+    setRecipeIndex(0);
 
     try {
       const response = await axios.post(
@@ -51,6 +55,7 @@ const IngredientSelector = () => {
         { ingredients: selectedIngredients }
       );
       setRecipes(response.data);
+      setShowRecipes(true);
     } catch (err) {
       console.error("Error:", err);
       setErrorMsg("Something went wrong while generating recipes. Please try again.");
@@ -66,182 +71,197 @@ const IngredientSelector = () => {
   const handleAddCustomIngredient = (category, value) => {
     if (!selectedIngredients.includes(value) && selectedIngredients.length < 10) {
       setSelectedIngredients([...selectedIngredients, value]);
-
-      // Add to initial category list
       setCategoryIngredients((prev) => ({
         ...prev,
         [category]: [...prev[category], value]
       }));
-
       setSearchTerms((prev) => ({ ...prev, [category]: "" }));
     }
+  };
+
+  const generateAnotherRecipe = () => {
+    setShowRecipes(false);
+    setSelectedIngredients([]);
+  };
+
+  const nextRecipe = () => {
+    setRecipeIndex((prev) => (prev + 1) % recipes.length);
+  };
+
+  const prevRecipe = () => {
+    setRecipeIndex((prev) => (prev - 1 + recipes.length) % recipes.length);
   };
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-4 text-center">Pick Up to 10 Ingredients</h1>
 
-      {selectedIngredients.length > 0 && (
+      {selectedIngredients.length > 0 && !showRecipes && (
         <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2 text-center">Selected Ingredients</h2>
-            <div className="flex flex-wrap justify-center gap-2">
+          <h2 className="text-xl font-semibold mb-2 text-center">Selected Ingredients</h2>
+          <div className="flex flex-wrap justify-center gap-2">
             {selectedIngredients.map((ingredient, index) => (
-                <div
+              <div
                 key={index}
                 className="flex items-center bg-green-600 text-white px-3 py-1 rounded-full text-sm"
-                >
+              >
                 {ingredient}
                 <button
-                    onClick={() =>
+                  onClick={() =>
                     setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient))
-                    }
-                    className="ml-2 text-white hover:text-gray-200 focus:outline-none"
-                    title="Remove"
+                  }
+                  className="ml-2 text-white hover:text-gray-200 focus:outline-none"
+                  title="Remove"
                 >
-                    ×
+                  ×
                 </button>
-                </div>
+              </div>
             ))}
-            </div>
+          </div>
         </div>
-        )}
+      )}
 
+      {!showRecipes && (
+        <div className="mb-6">
+          {Object.keys(categoryIngredients).map((category) => {
+            const searchTerm = searchTerms[category]?.toLowerCase() || "";
+            const filteredIngredients = categoryIngredients[category].filter((ing) =>
+              ing.toLowerCase().includes(searchTerm)
+            );
 
-      <div className="mb-6">
-        {Object.keys(categoryIngredients).map((category, idx) => {
-          const searchTerm = searchTerms[category]?.toLowerCase() || "";
-          const filteredIngredients = categoryIngredients[category].filter((ing) =>
-            ing.toLowerCase().includes(searchTerm)
-          );
-
-          return (
-            <div key={category} className="mb-4 border bg-blue-50 rounded-xl shadow">
-              <button
-                className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 font-semibold text-lg flex justify-between"
-                onClick={() => setOpenCategory(openCategory === category ? null : category)}
-              >
-                <span>{category}</span>
-                <span>{openCategory === category ? "▲" : "▼"}</span>
-              </button>
-              <AnimatePresence initial={false}>
-                {openCategory === category && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="px-4 py-3"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchTerms[category] || ""}
-                      onChange={(e) => handleSearchChange(category, e.target.value)}
-                      className="mb-3 p-2 border rounded w-full"
-                    />
-
-                    {searchTerms[category] && !categoryIngredients[category].includes(searchTerms[category]) && (
-                      <button
-                        onClick={() => handleAddCustomIngredient(category, searchTerms[category])}
-                        className="mb-3 text-sm text-green-700 underline"
-                      >
-                        Add "{searchTerms[category]}" to {category}
-                      </button>
-                    )}
-
-                    <div className="flex flex-wrap gap-2">
-                      {filteredIngredients.map((ingredient) => (
+            return (
+              <div key={category} className="mb-4 border bg-blue-50 rounded-xl shadow">
+                <button
+                  className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 font-semibold text-lg flex justify-between"
+                  onClick={() => setOpenCategory(openCategory === category ? null : category)}
+                >
+                  <span>{category}</span>
+                  <span>{openCategory === category ? "▲" : "▼"}</span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {openCategory === category && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="px-4 py-2"
+                    >
+                      <input
+                        type="text"
+                        placeholder="Search ingredients..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearchChange(category, e.target.value)}
+                        className="w-full px-3 py-2 mb-2 border rounded"
+                      />
+                      <div className="grid grid-cols-6 gap-2">
+                        {filteredIngredients.map((ingredient) => (
+                          <button
+                            key={ingredient}
+                            onClick={() => toggleIngredient(ingredient)}
+                            className={`w-full px-3 py-2 rounded-lg border ${
+                              selectedIngredients.includes(ingredient)
+                                ? "bg-green-500 text-white"
+                                : "bg-white text-black"
+                            }`}
+                          >
+                            {ingredient}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-2 flex justify-center">
                         <button
-                          key={ingredient}
-                          onClick={() => toggleIngredient(ingredient)}
-                          className={`px-3 py-1 text-sm rounded-full border transition ${
-                            selectedIngredients.includes(ingredient)
-                              ? "bg-green-600 text-white"
-                              : "bg-white text-gray-800 hover:bg-gray-100"
-                          }`}
+                          onClick={() => handleAddCustomIngredient(category, searchTerms[category])}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
                         >
-                          {ingredient}
+                          Add Custom Ingredient
                         </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
-      </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-      <div className="flex justify-center mb-6">
-        <button
-          onClick={generateRecipes}
-          disabled={selectedIngredients.length === 0 || loading}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? "Generating..." : "Generate Recipes"}
-        </button>
-      </div>
-
-      {errorMsg && (
-        <p className="text-red-600 text-center font-medium mb-4">{errorMsg}</p>
+      {selectedIngredients.length > 0 && !loading && !showRecipes && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={generateRecipes}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full"
+          >
+            Generate Recipes
+          </button>
+        </div>
       )}
 
       {loading && (
-        <div className="flex justify-center my-12">
-          <Loader/>
+        <div className="flex justify-center mt-6">
+          <Loader />
         </div>
       )}
 
-      {!loading && recipes.length > 0 && (
-        <div className="space-y-4">
-          {recipes.map((recipe, idx) => (
-            <div
-              key={idx}
-              className="border border-gray-300 rounded-xl bg-white shadow overflow-hidden"
-            >
-              <button
-                onClick={() => setOpenCategory(openCategory === `recipe-${idx}` ? null : `recipe-${idx}`)}
-                className="w-full text-left px-6 py-4 font-semibold text-lg bg-blue-50 hover:bg-blue-100 transition flex justify-between items-center"
-              >
-                <span>{recipe.title}</span>
-                <span>{openCategory === `recipe-${idx}` ? "▲" : "▼"}</span>
-              </button>
+      {errorMsg && <p className="text-red-500 text-center mt-4">{errorMsg}</p>}
 
-              <AnimatePresence initial={false}>
-                {openCategory === `recipe-${idx}` && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="px-6 py-4"
-                  >
-                    <p className="mb-4 text-gray-600">{recipe.description}</p>
+      {showRecipes && recipes.length > 0 && (
+  <div className="mt-10 flex flex-col items-center px-4">
+    <h2 className="text-2xl font-bold text-purple-700 mb-6">
+      🍽️ Recipe {recipeIndex + 1} of {recipes.length}
+    </h2>
 
-                    <div className="mb-2">
-                      <h3 className="font-semibold">Ingredients:</h3>
-                      <ul className="list-disc list-inside text-gray-700">
-                        {recipe.ingredients.map((item, i) => (
-                          <li key={i}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={recipeIndex}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -30 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-2xl bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 p-6 rounded-2xl shadow-xl border-2 border-purple-300"
+      >
+        <h3 className="text-2xl font-extrabold text-purple-800 mb-3">
+          {recipes[recipeIndex].title}
+        </h3>
+        <p className="text-gray-700 italic mb-4">{recipes[recipeIndex].description}</p>
 
-                    <div className="mt-4">
-                      <h3 className="font-semibold">Instructions:</h3>
-                      <ol className="list-decimal list-inside text-gray-700">
-                        {recipe.instructions.map((step, i) => (
-                          <li key={i}>{step}</li>
-                        ))}
-                      </ol>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+        <h4 className="font-bold text-lg text-purple-600 mt-4 mb-2">🧂 Ingredients</h4>
+        <ul className="list-disc list-inside text-gray-800 space-y-1">
+          {recipes[recipeIndex].ingredients.map((ingredient, idx) => (
+            <li key={idx}>{ingredient}</li>
           ))}
-        </div>
-      )}
+        </ul>
+
+        <h4 className="font-bold text-lg text-purple-600 mt-6 mb-2">👩‍🍳 Instructions</h4>
+        <p className="text-gray-800">{recipes[recipeIndex].instructions}</p>
+      </motion.div>
+    </AnimatePresence>
+
+    <div className="mt-6 flex gap-6">
+      <button
+        onClick={prevRecipe}
+        className="flex items-center gap-2 bg-purple-200 hover:bg-purple-300 text-purple-800 font-semibold px-5 py-2 rounded-full transition"
+      >
+        <ArrowLeft size={18} /> Prev
+      </button>
+      <button
+        onClick={nextRecipe}
+        className="flex items-center gap-2 bg-purple-200 hover:bg-purple-300 text-purple-800 font-semibold px-5 py-2 rounded-full transition"
+      >
+        Next <ArrowRight size={18} />
+      </button>
+    </div>
+
+    <div className="mt-8">
+      <button
+        onClick={generateAnotherRecipe}
+        className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition"
+      >
+        <Sparkles size={18} /> Generate Another Recipe
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 };
