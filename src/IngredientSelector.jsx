@@ -60,8 +60,13 @@ const IngredientSelector = () => {
 
     try {
       const response = await axios.post(
-        "https://recipe-mailer-backend-production.up.railway.app/generate-recipes",
-        { ingredients: selectedIngredients }
+        "http://switchyard.proxy.rlwy.net:33720/generate-recipes", // Use proxy URL here
+        { ingredients: selectedIngredients },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
       setRecipes(response.data);
       setShowRecipes(true);
@@ -72,6 +77,7 @@ const IngredientSelector = () => {
 
     setLoading(false);
   };
+
 
   const handleSearchChange = (category, value) => {
     setSearchTerms({ ...searchTerms, [category]: value });

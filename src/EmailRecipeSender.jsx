@@ -10,7 +10,7 @@ export default function EmailRecipeSender() {
     setStatus(null);
     try {
       const response = await fetch(
-        "https://recipe-mailer-backend-production.up.railway.app/send-single-email",
+        "http://switchyard.proxy.rlwy.net:33720/send-single-email",
         {
           method: "POST",
           headers: {
