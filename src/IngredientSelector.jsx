@@ -34,14 +34,23 @@ const IngredientSelector = () => {
     audio.play();
   };
 
+  const playTrash = () => {
+    const audio = new Audio("/trash.mp3");
+    audio.volume = 0.3;
+    audio.play();
+  };
+  
+
   const toggleIngredient = (ingredient) => {
     if (selectedIngredients.includes(ingredient)) {
+      playTrash(); // Play trash sound on removal
       setSelectedIngredients(selectedIngredients.filter((ing) => ing !== ingredient));
     } else if (selectedIngredients.length < 10) {
-      playPop();
+      playPop(); // Play pop sound on add
       setSelectedIngredients([...selectedIngredients, ingredient]);
     }
   };
+  
 
   const generateRecipes = async () => {
     setLoading(true);
@@ -107,9 +116,10 @@ const IngredientSelector = () => {
               >
                 {ingredient}
                 <button
-                  onClick={() =>
-                    setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient))
-                  }
+                  onClick={() => {
+                    playTrash();
+                    setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient));
+                  }}
                   className="ml-2 text-white hover:text-gray-200 focus:outline-none"
                   title="Remove"
                 >
