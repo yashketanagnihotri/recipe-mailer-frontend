@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import Loader from "./Loader";
 
 const ingredientCategories = {
   Vegetables: ["tomato", "onion", "potato", "carrot", "spinach", "cabbage", "cauliflower", "peas", "beans", "broccoli", "bell pepper", "cucumber", "lettuce", "zucchini", "radish", "beetroot", "pumpkin", "okra", "mushroom", "avocado"],
@@ -24,10 +25,17 @@ const IngredientSelector = () => {
   const [searchTerms, setSearchTerms] = useState({});
   const [categoryIngredients, setCategoryIngredients] = useState(ingredientCategories);
 
+  const playPop = () => {
+    const audio = new Audio("/pop.mp3");
+    audio.volume = 0.3;
+    audio.play();
+  };
+
   const toggleIngredient = (ingredient) => {
     if (selectedIngredients.includes(ingredient)) {
       setSelectedIngredients(selectedIngredients.filter((ing) => ing !== ingredient));
     } else if (selectedIngredients.length < 10) {
+      playPop();
       setSelectedIngredients([...selectedIngredients, ingredient]);
     }
   };
@@ -107,7 +115,7 @@ const IngredientSelector = () => {
           );
 
           return (
-            <div key={category} className="mb-4 border">
+            <div key={category} className="mb-4 border bg-blue-50 rounded-xl shadow">
               <button
                 className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 font-semibold text-lg flex justify-between"
                 onClick={() => setOpenCategory(openCategory === category ? null : category)}
@@ -180,7 +188,7 @@ const IngredientSelector = () => {
 
       {loading && (
         <div className="flex justify-center my-12">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          <Loader/>
         </div>
       )}
 
