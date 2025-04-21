@@ -50,7 +50,7 @@ export default function EmailRecipeSender() {
       const response = await fetch(
         "https://recipe-mailer-backend-production.up.railway.app/register-meal-preference",
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
